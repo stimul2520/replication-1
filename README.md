@@ -113,8 +113,9 @@ SELECT @@global.read_only;
 ```
 
 ![16](img/16.png)
+...
 ![17](img/17.png)
-
+...
 ```python
 #master
 CREATE DATABASE mir;
