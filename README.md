@@ -76,7 +76,7 @@ sudo docker network connect replication replica
 sudo docker network connect replication master
 ```
 
-[1](img/11.png)
+![1](img/11.png)
 
 ```python
 sudo docker cp master:/etc/my.cnf my-master.cnf
@@ -89,9 +89,9 @@ sudo docker cp my-replica.cnf  replica:/etc/my.cnf
 sudo docker restart replica
 ```
 
-[14](img/14.png)
-[12](img/12.png)
-[13](img/13.png)
+![14](img/14.png)
+![12](img/12.png)
+![13](img/13.png)
 
 ```python
 sudo docker exec -it master mysql
@@ -101,7 +101,7 @@ FLUSH PRIVILEGES;
 SHOW BINARY LOG STATUS;
 ```
 
-[15](img/15.png)
+![15](img/15.png)
 
 ```python
 sudo docker exec -it replica mysql
@@ -109,11 +109,11 @@ CHANGE REPLICATION SOURCE TO SOURCE_HOST='master', SOURCE_USER='replica', RELAY_
 START REPLICA;
 SHOW REPLICA STATUS\G;
 SELECT @@global.read_only;
-```
 #if 1 = replica
+```
 
-[16](img/16.png)
-[17](img/17.png)
+![16](img/16.png)
+![17](img/17.png)
 
 *master*
 
@@ -124,7 +124,7 @@ CREATE TABLE love (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(255), PRIMARY KE
 SHOW TABLES;
 ```
 
-[18](img/18.png)
+![18](img/18.png)
 
 *replica*
 
@@ -132,7 +132,7 @@ SHOW TABLES;
 SHOW DATABASES;
 ```
 
-[19](img/19.png)
+![19](img/19.png)
 
 
 ---
