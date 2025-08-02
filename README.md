@@ -1,4 +1,4 @@
-# Домашнее задание к занятию "`Название занятия`" - `Фамилия и имя студента`
+# Домашнее задание к занятию "Репликация и масштабирование. Часть 1" - Tarkov Viktor
 
 
 ### Инструкция по выполнению домашнего задания
@@ -24,94 +24,115 @@
 
 ### Задание 1
 
-`Приведите ответ в свободной форме........`
+На лекции рассматривались режимы репликации master-slave, master-master, опишите их различия.
 
-1. `Заполните здесь этапы выполнения, если требуется ....`
-2. `Заполните здесь этапы выполнения, если требуется ....`
-3. `Заполните здесь этапы выполнения, если требуется ....`
-4. `Заполните здесь этапы выполнения, если требуется ....`
-5. `Заполните здесь этапы выполнения, если требуется ....`
-6. 
+*Ответить в свободной форме.*
 
-```
-Поле для вставки кода...
-....
-....
-....
-....
-```
+Репликация — это процесс, под которым понимается копирование данных из одного источника на другой или на множество других и наоборот.
+С точки зрения базы данных, это механизм копирования базы данных и создания копий или дополнений существующих объектов.
 
-`При необходимости прикрепитe сюда скриншоты
-![Название скриншота 1](ссылка на скриншот 1)`
+Репликация типа *master-slave* часто используется для обеспечения отказоустойчивости приложений. Кроме этого, она позволяет распределить нагрузку на базу данных между несколькими серверами, или репликами.
+Master — это основной сервер БД, куда поступают все данные. Все изменения в данных — добавление, обновление, удаление — должны происходить на этом сервере.
+Slave — это вспомогательный сервер БД, который копирует все данные с мастера. С этого сервера следует читать данные. Таких серверов может быть несколько.
 
+Репликация *master-master* позволяет копировать данные с одного сервера на другой. Эта конфигурация добавляет избыточность и повышает эффективность при обращении к данным.
+Master-master репликации — это настройка обычной master-slave репликации, только в обе стороны, каждый сервер является мастером и слейвом одновременно.
 
 ---
 
 ### Задание 2
 
-`Приведите ответ в свободной форме........`
+Выполните конфигурацию master-slave репликации, примером можно пользоваться из лекции.
 
-1. `Заполните здесь этапы выполнения, если требуется ....`
-2. `Заполните здесь этапы выполнения, если требуется ....`
-3. `Заполните здесь этапы выполнения, если требуется ....`
-4. `Заполните здесь этапы выполнения, если требуется ....`
-5. `Заполните здесь этапы выполнения, если требуется ....`
-6. 
+*Приложите скриншоты конфигурации, выполнения работы: состояния и режимы работы серверов.*
 
+**Установка docker ubuntu**
+
+```python
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+docker --version
+sudo systemctl status docker
+sudo docker run hello-world
 ```
-Поле для вставки кода...
-....
-....
-....
-....
+
+**Установка и настройка docker и my-sql серверов**
+
+```python
+sudo docker run -d --name master -e MYSQL_ALLOW_EMPTY_PASSWORD=sql mysql:8.4
+sudo docker run -d --name replica -e MYSQL_ALLOW_EMPTY_PASSWORD=sql mysql:8.4
+sudo docker network create replication
+sudo docker network connect replication replica
+sudo docker network connect replication master
 ```
 
-`При необходимости прикрепитe сюда скриншоты
-![Название скриншота 2](ссылка на скриншот 2)`
+[1](img/11.png)
+
+```python
+sudo docker cp master:/etc/my.cnf my-master.cnf
+sudo nano my-master.cnf
+sudo docker cp my-master.cnf  master:/etc/my.cnf
+sudo docker restart master
+sudo docker cp replica:/etc/my.cnf my-replica.cnf
+sudo nano my-replica.cnf
+sudo docker cp my-replica.cnf  replica:/etc/my.cnf
+sudo docker restart replica
+```
+
+[14](img/14.png)
+[12](img/12.png)
+[13](img/13.png)
+
+```python
+sudo docker exec -it master mysql
+CREATE USER 'replica'@'%';
+GRANT REPLICATION SLAVE ON *.* TO 'replica'@'%';
+FLUSH PRIVILEGES;
+SHOW BINARY LOG STATUS;
+```
+
+[15](img/15.png)
+
+```python
+sudo docker exec -it replica mysql
+CHANGE REPLICATION SOURCE TO SOURCE_HOST='master', SOURCE_USER='replica', RELAY_LOG_POS=773;
+START REPLICA;
+SHOW REPLICA STATUS\G;
+SELECT @@global.read_only;
+```
+#if 1 = replica
+
+[16](img/16.png)
+[17](img/17.png)
+
+*master*
+
+```python
+CREATE DATABASE mir;
+USE mir; 
+CREATE TABLE love (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(255), PRIMARY KEY(id));
+SHOW TABLES;
+```
+
+[18](img/18.png)
+
+*replica*
+
+```python
+SHOW DATABASES;
+```
+
+[19](img/19.png)
 
 
 ---
-
-### Задание 3
-
-`Приведите ответ в свободной форме........`
-
-1. `Заполните здесь этапы выполнения, если требуется ....`
-2. `Заполните здесь этапы выполнения, если требуется ....`
-3. `Заполните здесь этапы выполнения, если требуется ....`
-4. `Заполните здесь этапы выполнения, если требуется ....`
-5. `Заполните здесь этапы выполнения, если требуется ....`
-6. 
-
-```
-Поле для вставки кода...
-....
-....
-....
-....
-```
-
-`При необходимости прикрепитe сюда скриншоты
-![Название скриншота](ссылка на скриншот)`
-
-### Задание 4
-
-`Приведите ответ в свободной форме........`
-
-1. `Заполните здесь этапы выполнения, если требуется ....`
-2. `Заполните здесь этапы выполнения, если требуется ....`
-3. `Заполните здесь этапы выполнения, если требуется ....`
-4. `Заполните здесь этапы выполнения, если требуется ....`
-5. `Заполните здесь этапы выполнения, если требуется ....`
-6. 
-
-```
-Поле для вставки кода...
-....
-....
-....
-....
-```
-
-`При необходимости прикрепитe сюда скриншоты
-![Название скриншота](ссылка на скриншот)`
