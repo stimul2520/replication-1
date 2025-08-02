@@ -115,9 +115,8 @@ SELECT @@global.read_only;
 ![16](img/16.png)
 ![17](img/17.png)
 
-*master*
-
 ```python
+#master
 CREATE DATABASE mir;
 USE mir; 
 CREATE TABLE love (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(255), PRIMARY KEY(id));
@@ -126,9 +125,8 @@ SHOW TABLES;
 
 ![18](img/18.png)
 
-*replica*
-
 ```python
+#replica
 SHOW DATABASES;
 ```
 
